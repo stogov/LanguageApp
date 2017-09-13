@@ -2,16 +2,15 @@ swagger: "2.0"
 info:
   version: 1.0.0
   title: "LanguageApp"
-  description: A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification
+  description: описание спецификации для langapp
   termsOfService: http://swagger.io/terms/
   contact:
-    name: Swagger API Team
-    email: foo@example.com
-    url: http://madskristensen.net
+    name: Oleg Toplionkin
+    email: toplionkin@siberian.pro
   license:
     name: MIT
     url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
-host: petstore.swagger.io
+host: langapp.swagger.io
 basePath: /api
 schemes:
   - http
@@ -20,120 +19,299 @@ consumes:
 produces:
   - application/json
 paths:
-  /pets:
-    get:
-      description: |
-        Returns all pets from the system that the user has access to
-        Nam sed condimentum est. Maecenas tempor sagittis sapien, nec rhoncus sem sagittis sit amet. Aenean at gravida augue, ac iaculis sem. Curabitur odio lorem, ornare eget elementum nec, cursus id lectus. Duis mi turpis, pulvinar ac eros ac, tincidunt varius justo. In hac habitasse platea dictumst. Integer at adipiscing ante, a sagittis ligula. Aenean pharetra tempor ante molestie imperdiet. Vivamus id aliquam diam. Cras quis velit non tortor eleifend sagittis. Praesent at enim pharetra urna volutpat venenatis eget eget mauris. In eleifend fermentum facilisis. Praesent enim enim, gravida ac sodales sed, placerat id erat. Suspendisse lacus dolor, consectetur non augue vel, vehicula interdum libero. Morbi euismod sagittis libero sed lacinia.
-        Sed tempus felis lobortis leo pulvinar rutrum. Nam mattis velit nisl, eu condimentum ligula luctus nec. Phasellus semper velit eget aliquet faucibus. In a mattis elit. Phasellus vel urna viverra, condimentum lorem id, rhoncus nibh. Ut pellentesque posuere elementum. Sed a varius odio. Morbi rhoncus ligula libero, vel eleifend nunc tristique vitae. Fusce et sem dui. Aenean nec scelerisque tortor. Fusce malesuada accumsan magna vel tempus. Quisque mollis felis eu dolor tristique, sit amet auctor felis gravida. Sed libero lorem, molestie sed nisl in, accumsan tempor nisi. Fusce sollicitudin massa ut lacinia mattis. Sed vel eleifend lorem. Pellentesque vitae felis pretium, pulvinar elit eu, euismod sapien.
-      operationId: findPets
-      parameters:
-        - name: tags
-          in: query
-          description: tags to filter by
-          required: false
-          type: array
-          collectionFormat: csv
-          items:
-            type: string
-        - name: limit
-          in: query
-          description: maximum number of results to return
-          required: false
-          type: integer
-          format: int32
-      responses:
-        200:
-          description: pet response
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Pet'
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+  /auth:
     post:
-      description: Creates a new pet in the store.  Duplicates are allowed
-      operationId: addPet
+      description: Авторизуется на сервере
       parameters:
-        - name: pet
+        - name: LoginCredentials
           in: body
-          description: Pet to add to the store
+          description: данные авторизации
           required: true
           schema:
-            $ref: '#/definitions/NewPet'
+            $ref: '#/definitions/LoginCredentials'
       responses:
         200:
-          description: pet response
+          description: данные пользователя. если указанный uid не существует, то он создается.
           schema:
-            $ref: '#/definitions/Pet'
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /pets/{id}:
+            $ref: '#/definitions/ServerResponceUser'
+            
+  /test/{uid}:
     get:
-      description: Returns a user based on a single ID, if the user does not have access to the pet
-      operationId: find pet by id
+      description: Получает задание для тестирования
       parameters:
-        - name: id
+        - name:  uid
+          type: string
           in: path
-          description: ID of pet to fetch
           required: true
-          type: integer
-          format: int64
       responses:
         200:
-          description: pet response
+          description: список слов для тестирования
           schema:
-            $ref: '#/definitions/Pet'
-        default:
-          description: unexpected error
+            $ref: "#/definitions/ServerResponceTest"
+            
+  /test/{uid}/result:
+    post:
+      description: результат тестового задания
+      parameters:
+        - name:  uid
+          in: path
+          required: true
+          type: string
+          
+        - name: knownWords
+          description: перечисление id слов которые пользователь знает
+          required: true
+          type: string
+          in: query
+          
+      responses:
+        200:
+          description: возвращает данные пользователя
           schema:
-            $ref: '#/definitions/Error'
-    delete:
-      description: deletes a single pet based on the ID supplied
-      operationId: deletePet
+            $ref: "#/definitions/ServerResponceUser"
+            
+  /feedback:
+    post:
+      description: отзыв клиента
+      parameters:
+        - name: name
+          in: query
+          type: string
+          required: true
+          description: имя клиента
+        - name: smile
+          in: query
+          type: integer
+          description: id смайлика
+          required: true
+        - name: email
+          in: query
+          type: string
+          description: почта
+          required: true
+        - name: message
+          in: query
+          type: string
+          description: сам отзыв
+          required: true
+      responses:
+        200:
+          description: все ок
+          
+  /tests/learnEx/{userId}:
+    get:
+      description: упражнение изучение слов
+      parameters:
+        - name:  userId
+          in: path
+          required: true
+          type: string
+          description: id пользователя
+      responses:
+        200:
+          description: получили новый тест
+          schema:
+            $ref: "#/definitions/ServerResponceLearn"
+        403:
+          description: пользователю нельзя пройти тест сегодня
+          
+  /tests/learnEx/{id}/replaceWord:
+    put:
+      description: пользователь знает слово - нужно его заменить
       parameters:
         - name: id
           in: path
-          description: ID of pet to delete
           required: true
           type: integer
-          format: int64
+          description: id упражнения
+        - name: wordId
+          in: query
+          required: true
+          type: integer
+          description: id слова для замены
       responses:
-        204:
-          description: pet deleted
-        default:
-          description: unexpected error
+        200:
+          description: заменяющее слово
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/ServerResponceWord"
+            
+  /tests/learnEx/{id}/save:
+    put:
+      description: пользователь взял упражнение на изучение и прошел все слова
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          description: id упражнения
+      responses:
+        200:
+          description: ок
+        
+  /user/{userId}/learnedWords:
+    get:
+      description: список слов которые пользователь изучил
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: integer
+          description: id пользователя
+      responses:
+        200:
+          description: список слов который пользователь выучил
+          schema:
+            $ref: "#/definitions/ServerResponceWordList"
+          
+  /user/{userId}/activeWords:
+    get:
+      description: слова на изучении
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: integer
+          description: id пользователя
+      responses:
+        200:
+          description: список слов на изучении
+          schema:
+            $ref: "#/definitions/ServerResponceWordList"
+            
 definitions:
-  Pet:
-    allOf:
-      - $ref: '#/definitions/NewPet'
-      - required:
-        - id
-        properties:
-          id:
-            type: integer
-            format: int64
-  NewPet:
-    required:
-      - name
+  LoginCredentials:
+    type: object
     properties:
-      name:
+      uid: 
         type: string
-      tag:
-        type: string
-  Error:
+    example:
+      uid: 11111-2222-3333-44444444
+        
+  User:
+    type: object
     required:
-      - code
-      - message
+      - uid
+      - rank
+      - knownWords
     properties:
-      code:
+      uid:
+        type: string
+      rank:
+        type: string
+        enum: 
+        - NOVICE
+        - MEDIUM
+        - HIGH
+        - NATIVE
+      knownWords:
         type: integer
-        format: int32
+      lastTestPassed:
+        type: string
+        format: date-time
+    example:
+      uid: 11111-2222-3333-44444444
+      rank: NOVICE
+      
+  Word:
+    type: object
+    properties:
+      id:
+        type: integer
+      word:
+        type: string
+        description: само слово, то что будет выводится на экран
+      description:
+        type: string
+        description: описание слова
+      translation:
+        type: string
+        description: перевод слова
+      rank:
+        type: string
+        description: ранг слова
+        enum:
+        - NOVICE
+        - MEDIUM
+        - HIGH
+        - NATIVE
+      position:
+        type: integer
+        description: позиция слова в ранге
+    required:
+      - id
+      - word
+      - translation
+      - rank
+      - position
+      
+  Test:
+    type: object
+    properties:
+      items: 
+        $ref: "#/definitions/Word"
+  
+  LearningEx:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: id упражнения
+      items: 
+        $ref: "#/definitions/Word"
+  
+  ServerResponce: 
+    type: object
+    properties:
+      class: 
+        type: string
+        enum:
+        - User
+      error:
+        type: integer
       message:
         type: string
+    required:
+      - class
+      
+  ServerResponceUser:
+    type: object
+    allOf:
+      - $ref: "#/definitions/ServerResponce"
+    properties:
+      payload:
+        $ref: "#/definitions/User"
+        
+  ServerResponceTest:
+    type: object
+    allOf:
+      - $ref: "#/definitions/ServerResponce"
+    properties:
+      payload:
+        $ref: "#/definitions/Test"
+        
+  ServerResponceLearn:
+    type: object
+    allOf:
+      - $ref: "#/definitions/ServerResponce"
+    properties:
+      payload:
+        $ref: "#/definitions/LearningEx"
+        
+  ServerResponceWord:
+    type: object
+    allOf:
+      - $ref: "#/definitions/ServerResponce"
+    properties:
+      payload:
+        $ref: "#/definitions/Word"
+        
+        
+  ServerResponceWordList:
+    type: object
+    allOf:
+      - $ref: "#/definitions/ServerResponce"
+    properties:
+      items: 
+        type: array
+        items:
+          $ref: "#/definitions/Word"

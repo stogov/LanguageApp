@@ -178,6 +178,21 @@ paths:
           schema:
             $ref: "#/definitions/ServerResponceWordList"
             
+  /tests/verifyEx/{userId}:
+    get:
+      description: проверка слов
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          type: integer
+          description: id пользователя
+      responses:
+        200:
+          description: все ок
+          schema:
+            $ref: "#/definitions/ServerResponceVerifyEx"
+            
 definitions:
   LoginCredentials:
     type: object
@@ -243,6 +258,16 @@ definitions:
       - translation
       - rank
       - position
+      
+  WordVariant:
+    type: object
+    properties:
+      word:
+        $ref: "#/definitions/Word"
+      variants:
+        type: array
+        items: 
+          type: string
       
   Test:
     type: object
@@ -315,3 +340,13 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Word"
+    
+  ServerResponceVerifyEx:
+    type: object
+    allOf:
+      - $ref: "#/definitions/ServerResponce"
+    properties:
+      items: 
+        type: array
+        items:
+          $ref: "#/definitions/WordVariant"

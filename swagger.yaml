@@ -193,6 +193,25 @@ paths:
           schema:
             $ref: "#/definitions/ServerResponceVerifyEx"
             
+  /tests/verifyEx/{id}/result:
+    post:
+      description: ответ на проверку слов
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          description: id упражнения
+          
+        - name: correctWords  
+          description: перечисление id слов которые пользователь ответил правильно
+          required: true
+          type: string
+          in: query
+      responses:
+        200:
+          description: все ок
+            
 definitions:
   LoginCredentials:
     type: object
@@ -291,10 +310,16 @@ definitions:
         type: string
         enum:
         - User
-      error:
+        - Word
+        - WordVariant
+        - LearnEx
+        - VerifyEx
+      statusCode:
         type: integer
+        description: числовое описание ошибки
       message:
         type: string
+        description: словестное техническое описание ошибки
     required:
       - class
       

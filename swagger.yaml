@@ -43,6 +43,11 @@ paths:
           type: string
           in: path
           required: true
+        - name: rank
+          type: integer
+          in: query
+          required: true
+          description: id уровня который требуется в тестировании
       responses:
         200:
           description: список слов для тестирования
@@ -62,6 +67,12 @@ paths:
           description: перечисление id слов которые пользователь знает
           required: true
           type: string
+          in: query
+        
+        - name: rank
+          description: уровень пользователя который тестируется
+          required: true
+          type: integer
           in: query
           
       responses:
